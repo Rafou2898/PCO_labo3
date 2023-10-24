@@ -73,6 +73,7 @@ std::map<ItemType, int> Wholesale::getItemsForSale() {
 
 
 int Wholesale::trade(ItemType it, int qty) {
+    // TODO: Can be done cleaner with dynamic resolution
     if (conditionToTrade(it, qty)) {
         return 0;
     }
