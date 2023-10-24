@@ -21,6 +21,7 @@ public:
 
     std::map<ItemType, int> getItemsForSale() override;
     int trade(ItemType it, int qty) override;
+    bool conditionToTrade(ItemType it, int qty);
 
     /**
      * @brief Routine de minage de ressources (fonction threadée)

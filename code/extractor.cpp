@@ -19,9 +19,23 @@ std::map<ItemType, int> Extractor::getItemsForSale() {
 }
 
 int Extractor::trade(ItemType it, int qty) {
-    // TODO
+    if (conditionToTrade(it, qty)) {
+        return 0;
+    }
+    mutex.lock();
+    stocks.at(it) -= qty;
+    int cost = qty * getCostPerUnit(it);
+    money += cost;
+    mutex.unlock();
+    interface->updateFund(uniqueId, money);
+    interface->updateStock(uniqueId, &stocks);
+    return cost;
+}
 
-    return 0;
+bool Extractor::conditionToTrade(ItemType it, int qty) {
+    return qty <= 0
+    || getItemsForSale().find(it) == getItemsForSale().end() 
+    || getItemsForSale().at(it) < qty;
 }
 
 void Extractor::run() {
@@ -39,13 +53,17 @@ void Extractor::run() {
         }
 
         /* On peut payer un mineur */
+        mutex.lock();
         money -= minerCost;
+        mutex.unlock();
         /* Temps aléatoire borné qui simule le mineur qui mine */
         PcoThread::usleep((rand() % 100 + 1) * 10000);
         /* Statistiques */
+        mutex.lock();
         nbExtracted++;
         /* Incrément des stocks */
         stocks[resourceExtracted] += 1;
+        mutex.unlock();
         /* Message dans l'interface graphique */
         interface->consoleAppendText(uniqueId, QString("1 ") % getItemName(resourceExtracted) %
                                      " has been mined");

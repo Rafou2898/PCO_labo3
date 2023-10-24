@@ -47,12 +47,24 @@ bool Factory::verifyResources() {
 
 void Factory::buildItem() {
 
-    // TODO
+    int builderCost = getEmployeeSalary(getEmployeeThatProduces(itemBuilt));
+
+    mutex.lock();
+    money -= builderCost;
+    for (auto& item : resourcesNeeded) {
+        --stocks[item];
+    }
+    mutex.unlock();
+    interface->updateFund(uniqueId, money);
+    interface->updateStock(uniqueId, &stocks);
 
     //Temps simulant l'assemblage d'un objet.
     PcoThread::usleep((rand() % 100) * 100000);
 
-    // TODO
+    mutex.lock();
+    ++stocks[itemBuilt];
+    ++nbBuild;
+    mutex.unlock();
 
     interface->consoleAppendText(uniqueId, "Factory have build a new object");
 }
@@ -60,6 +72,11 @@ void Factory::buildItem() {
 void Factory::orderResources() {
 
     // TODO - Itérer sur les resourcesNeeded et les wholesalers disponibles
+    for (auto item : resourcesNeeded) {
+        for (auto wholesaler : wholesalers) {
+
+        }
+    }
 
     //Temps de pause pour éviter trop de demande
     PcoThread::usleep(10 * 100000);
@@ -90,8 +107,23 @@ std::map<ItemType, int> Factory::getItemsForSale() {
 }
 
 int Factory::trade(ItemType it, int qty) {
-    // TODO
-    return 0;
+    if (conditionToTrade(it, qty)) {
+        return 0;
+    }
+    mutex.lock();
+    stocks.at(it) -= qty;
+    int cost = qty * getCostPerUnit(it);
+    money += cost;
+    mutex.unlock();
+    interface->updateFund(uniqueId, money);
+    interface->updateStock(uniqueId, &stocks);
+    return cost;
+}
+
+bool Factory::conditionToTrade(ItemType it, int qty) {
+    return qty <= 0
+    || getItemsForSale().find(it) == getItemsForSale().end() 
+    || getItemsForSale().at(it) < qty;
 }
 
 int Factory::getAmountPaidToWorkers() {

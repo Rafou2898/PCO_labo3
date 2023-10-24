@@ -37,7 +37,14 @@ void Wholesale::buyResources() {
 
     interface->consoleAppendText(uniqueId, QString("I would like to buy %1 of ").arg(qty) %
                                  getItemName(i) % QString(" which would cost me %1").arg(price));
-    /* TODO */
+    if (money <= price && s->trade(i, qty) == price) {
+        mutex.lock();
+        stocks[i] += qty;
+        money -= price;
+        mutex.unlock();
+        interface->consoleAppendText(uniqueId, QString("I bought %1 of ").arg(qty) %
+                                     getItemName(i) % QString(" for %1").arg(price));
+    }
 }
 
 void Wholesale::run() {
@@ -64,11 +71,25 @@ std::map<ItemType, int> Wholesale::getItemsForSale() {
     return stocks;
 }
 
+
 int Wholesale::trade(ItemType it, int qty) {
+    if (conditionToTrade(it, qty)) {
+        return 0;
+    }
+    mutex.lock();
+    stocks.at(it) -= qty;
+    int cost = qty * getCostPerUnit(it);
+    money += cost;
+    mutex.unlock();
+    interface->updateFund(uniqueId, money);
+    interface->updateStock(uniqueId, &stocks);
+    return cost;
+}
 
-    // TODO
-
-    return 0;
+bool Wholesale::conditionToTrade(ItemType it, int qty) {
+    return qty <= 0
+    || getItemsForSale().find(it) == getItemsForSale().end() 
+    || getItemsForSale().at(it) < qty;
 }
 
 void Wholesale::setInterface(WindowInterface *windowInterface) {

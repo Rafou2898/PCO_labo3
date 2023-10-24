@@ -29,6 +29,7 @@ public:
 
     std::map<ItemType, int> getItemsForSale() override;
     int trade(ItemType it, int number) override;
+    bool conditionToTrade(ItemType it, int qty);
 
     /**
      * @brief Permet d'accèder au coût du matériel produit par l'usine

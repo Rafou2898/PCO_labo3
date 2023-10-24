@@ -5,6 +5,7 @@
 #include <QStringBuilder>
 #include <map>
 #include <vector>
+#include <pcosynchro/pcomutex.h>
 #include "costs.h"
 
 enum class ItemType { Sand, Copper, Petrol, Chip, Plastic, Robot, Nothing};
@@ -56,6 +57,8 @@ public:
     int getFund() { return money; }
 
     int getUniqueId() { return uniqueId; }
+
+    PcoMutex mutex;
 
 protected:
     /**
