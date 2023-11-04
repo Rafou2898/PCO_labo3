@@ -70,17 +70,17 @@ void Factory::buildItem() {
 }
 
 void Factory::orderResources() {
-    for (auto resource : resourcesNeeded) {
-        if (stocks.at(resource) == 0) {
+    for (auto& resource : resourcesNeeded) {
+        if (stocks[resource] == 0) {
             for (auto wholesaler : wholesalers) {
-                if (wholesaler->getItemsForSale().at(resource) > 0) {
+                if (wholesaler->getItemsForSale()[resource] > 0) {
                     if(money >= getCostPerUnit(resource)) {
                         int costs = wholesaler->trade(resource, 1);
                         if (costs != 0) {
                             mutex.lock();
                             money -= costs;
                             stocks[resource] += 1;
-                            mutex.lock();
+                            mutex.unlock();
                         }
                     }
                 }
