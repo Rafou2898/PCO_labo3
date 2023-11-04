@@ -88,8 +88,9 @@ void Factory::orderResources() {
         }
     }
 
-    /* Temps de pause pour éviter trop de demande */
+    //Temps de pause pour éviter trop de demande
     PcoThread::usleep(10 * 100000);
+
 }
 
 void Factory::run() {
