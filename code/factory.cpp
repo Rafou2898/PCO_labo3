@@ -70,34 +70,19 @@ void Factory::buildItem() {
 }
 
 void Factory::orderResources() {
-
-    // TODO - Itérer sur les resourcesNeeded et les wholesalers disponibles
-    for (ItemType item : resourcesNeeded) {
-        if(stocks[item] != 0) {
-            break;
-        }
-        int qty = 1;
-        int price = qty * getCostPerUnit(item);
-        if (money < price) { /**TODO: Il faut continue ou break? */
-            /* Pas assez d'argent */
-            /* Attend des jours meilleurs */
-            PcoThread::usleep(1000U);
-            continue;
-        }
-        for (auto wholesaler: wholesalers) {
-            std::map<ItemType, int> itemsForSale = wholesaler->getItemsForSale();
-            if (itemsForSale.find(item) != itemsForSale.end()) {
-                interface->consoleAppendText(uniqueId, QString("Factory would like to buy %1 of ").arg(qty) %
-                                             getItemName(item) % QString(" which would cost me %1").arg(price));
-                if (wholesaler->trade(item, qty) == price) {
-                    mutex.lock();
-                    stocks[item] += qty;
-                    money -= price;
-                    mutex.unlock();
-                    interface->updateFund(uniqueId, money);
-                    interface->updateStock(uniqueId, &stocks);
-                    interface->consoleAppendText(uniqueId, QString("Factory bought %1 of ").arg(qty) %
-                                                 getItemName(item) % QString(" for %1").arg(price));
+    for (auto resource : resourcesNeeded) {
+        if (stocks.at(resource) == 0) {
+            for (auto wholesaler : wholesalers) {
+                if (wholesaler->getItemsForSale().at(resource) > 0) {
+                    if(money >= getCostPerUnit(resource)) {
+                        int costs = wholesaler->trade(resource, 1);
+                        if (costs != 0) {
+                            mutex.lock();
+                            money -= costs;
+                            stocks[resource] += 1;
+                            mutex.lock();
+                        }
+                    }
                 }
             }
         }
