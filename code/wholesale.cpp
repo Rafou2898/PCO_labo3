@@ -49,13 +49,15 @@ void Wholesale::buyResources() {
 
 void Wholesale::run() {
 
+
     if (sellers.empty()) {
         std::cerr << "You have to give factories and mines to a wholeseler before launching is routine" << std::endl;
         return;
     }
 
     interface->consoleAppendText(uniqueId, "[START] Wholesaler routine");
-    while (true /* TODO terminaison*/) {
+    while (!PcoThread::thisThread()->stopRequested() /* TODO terminaison*/) {
+
         buyResources();
         interface->updateFund(uniqueId, money);
         interface->updateStock(uniqueId, &stocks);
