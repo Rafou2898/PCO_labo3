@@ -72,9 +72,34 @@ void Factory::buildItem() {
 void Factory::orderResources() {
 
     // TODO - Itérer sur les resourcesNeeded et les wholesalers disponibles
-    for (auto item : resourcesNeeded) {
-        for (auto wholesaler : wholesalers) {
-
+    for (ItemType item : resourcesNeeded) {
+        if(stocks[item] != 0) {
+            break;
+        }
+        int qty = 1;
+        int price = qty * getCostPerUnit(item);
+        if (money < price) { /**TODO: Il faut continue ou break? */
+            /* Pas assez d'argent */
+            /* Attend des jours meilleurs */
+            PcoThread::usleep(1000U);
+            continue;
+        }
+        for (auto wholesaler: wholesalers) {
+            std::map<ItemType, int> itemsForSale = wholesaler->getItemsForSale();
+            if (itemsForSale.find(item) != itemsForSale.end()) {
+                interface->consoleAppendText(uniqueId, QString("Factory would like to buy %1 of ").arg(qty) %
+                                             getItemName(item) % QString(" which would cost me %1").arg(price));
+                if (wholesaler->trade(item, qty) == price) {
+                    mutex.lock();
+                    stocks[item] += qty;
+                    money -= price;
+                    mutex.unlock();
+                    interface->updateFund(uniqueId, money);
+                    interface->updateStock(uniqueId, &stocks);
+                    interface->consoleAppendText(uniqueId, QString("Factory bought %1 of ").arg(qty) %
+                                                 getItemName(item) % QString(" for %1").arg(price));
+                }
+            }
         }
     }
 
@@ -108,22 +133,25 @@ std::map<ItemType, int> Factory::getItemsForSale() {
 }
 
 int Factory::trade(ItemType it, int qty) {
+    mutex.lock();
     if (conditionToTrade(it, qty)) {
+        mutex.unlock();
         return 0;
     }
-    mutex.lock();
-    stocks.at(it) -= qty;
+    stocks[it] -= qty;
     int cost = qty * getCostPerUnit(it);
     money += cost;
     mutex.unlock();
     interface->updateFund(uniqueId, money);
     interface->updateStock(uniqueId, &stocks);
+    interface->consoleAppendText(uniqueId, QString("Factory sold %1 of ").arg(qty) %
+                                 getItemName(it) % QString(" for %1").arg(cost));
     return cost;
 }
 
 bool Factory::conditionToTrade(ItemType it, int qty) {
     return qty <= 0
-    || getItemsForSale().find(it) == getItemsForSale().end() 
+    || getItemsForSale().find(it) == getItemsForSale().end()
     || getItemsForSale().at(it) < qty;
 }
 

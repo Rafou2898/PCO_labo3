@@ -19,22 +19,25 @@ std::map<ItemType, int> Extractor::getItemsForSale() {
 }
 
 int Extractor::trade(ItemType it, int qty) {
+    mutex.lock();
     if (conditionToTrade(it, qty)) {
+        mutex.unlock();
         return 0;
     }
-    mutex.lock();
-    stocks.at(it) -= qty;
+    stocks[it] -= qty;
     int cost = qty * getCostPerUnit(it);
     money += cost;
     mutex.unlock();
     interface->updateFund(uniqueId, money);
     interface->updateStock(uniqueId, &stocks);
+    interface->consoleAppendText(uniqueId, QString("Mine sold %1 of ").arg(qty) %
+                                 getItemName(it) % QString(" for %1").arg(cost));
     return cost;
 }
 
 bool Extractor::conditionToTrade(ItemType it, int qty) {
     return qty <= 0
-    || getItemsForSale().find(it) == getItemsForSale().end() 
+    || getResourceMined() != it
     || getItemsForSale().at(it) < qty;
 }
 
