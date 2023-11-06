@@ -70,7 +70,6 @@ void Factory::buildItem() {
 }
 
 void Factory::orderResources() {
-<<<<<<< HEAD
     for (auto resource : resourcesNeeded) {
         int price = getCostPerUnit(resource);
         if (stocks[resource] == 0) {
@@ -80,22 +79,7 @@ void Factory::orderResources() {
                     money -= price;
                     stocks[resource] += 1;
                     mutex.unlock();
-=======
-    for (auto& resource : resourcesNeeded) {
-        if (stocks[resource] == 0) {
-            for (auto wholesaler : wholesalers) {
-                if (wholesaler->getItemsForSale()[resource] > 0) {
-                    if(money >= getCostPerUnit(resource)) {
-                        int costs = wholesaler->trade(resource, 1);
-                        if (costs != 0) {
-                            mutex.lock();
-                            money -= costs;
-                            stocks[resource] += 1;
-                            mutex.unlock();
-                        }
-                    }
->>>>>>> main
-                }
+		}
                 mutex.unlock();
             }
         }
