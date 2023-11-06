@@ -76,13 +76,13 @@ std::map<ItemType, int> Wholesale::getItemsForSale() {
 
 
 int Wholesale::trade(ItemType it, int qty) {
+    int cost = qty * getCostPerUnit(it);
     mutex.lock();
     if (conditionToTrade(it, qty)) {
         mutex.unlock();
         return 0;
     }
     stocks[it] -= qty;
-    int cost = qty * getCostPerUnit(it);
     money += cost;
     mutex.unlock();
     interface->updateFund(uniqueId, money);

@@ -79,7 +79,7 @@ void Factory::orderResources() {
                     money -= price;
                     stocks[resource] += 1;
                     mutex.unlock();
-		}
+                }
                 mutex.unlock();
             }
         }
@@ -115,13 +115,13 @@ std::map<ItemType, int> Factory::getItemsForSale() {
 }
 
 int Factory::trade(ItemType it, int qty) {
+    int cost = qty * getCostPerUnit(it);
     mutex.lock();
     if (conditionToTrade(it, qty)) {
         mutex.unlock();
         return 0;
     }
     stocks[it] -= qty;
-    int cost = qty * getCostPerUnit(it);
     money += cost;
     mutex.unlock();
     interface->updateFund(uniqueId, money);

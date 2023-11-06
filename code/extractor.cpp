@@ -19,13 +19,13 @@ std::map<ItemType, int> Extractor::getItemsForSale() {
 }
 
 int Extractor::trade(ItemType it, int qty) {
+    int cost = qty * getCostPerUnit(it);
     mutex.lock();
     if (conditionToTrade(it, qty)) {
         mutex.unlock();
         return 0;
     }
     stocks[it] -= qty;
-    int cost = qty * getCostPerUnit(it);
     money += cost;
     mutex.unlock();
     interface->updateFund(uniqueId, money);
