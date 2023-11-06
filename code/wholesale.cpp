@@ -37,14 +37,15 @@ void Wholesale::buyResources() {
 
     interface->consoleAppendText(uniqueId, QString("Wholesaler would like to buy %1 of ").arg(qty) %
                                  getItemName(i) % QString(" which would cost me %1").arg(price));
+    mutex.lock();
     if (price <= money && (s->trade(i, qty) == price)) {
-        mutex.lock();
         stocks[i] += qty;
         money -= price;
         mutex.unlock();
         interface->consoleAppendText(uniqueId, QString("Wholesaler bought %1 of ").arg(qty) %
                                      getItemName(i) % QString(" for %1").arg(price));
     }
+    mutex.unlock();
 }
 
 void Wholesale::run() {
