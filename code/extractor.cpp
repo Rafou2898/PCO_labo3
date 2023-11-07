@@ -60,7 +60,7 @@ void Extractor::run() {
         money -= minerCost;
         mutex.unlock();
         /* Temps aléatoire borné qui simule le mineur qui mine */
-        PcoThread::usleep((rand() % 100 + 1) * 10000);
+        PcoThread::usleep((rand() % 100 + 1) * 100000);
         /* Statistiques */
         mutex.lock();
         nbExtracted++;
