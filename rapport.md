@@ -114,6 +114,10 @@ void Wholesale::buyResources() {
 ```
 Nous avons opté pour la 2ème solution car l'idée derrière cette approche est de tirer parti du fait que, après un `trade()`, les ressources du `Wholeseller` seront modifiées, mais son argent sera au moins le même, voire supérieur, car la seule méthode qui modifie l'argent est `trade()`, et elle n'effectue que des ajouts d'argent. Il est donc essentiel de prendre en compte cette logique si vous envisagez de modifier le code ultérieurement.
 
+### Améliorations possibles
+Nous avons pris conscience que notre programme contient une quantité considérable de code redondant, notamment dans la fonction trade(). Nous aurions pu envisager l'utilisation de fonctions génériques pour éviter cette redondance. Cependant, nous avons fait le choix de ne pas le faire. La principale raison derrière cette décision était de préserver la lisibilité et la compréhension du code, en particulier pour les personnes qui découvrent déjà la programmation concurrente avec des sections critiques, ce qui peut être une notion complexe et nouvelle pour nous.
+
+Nous avons donc fait le choix délibéré de maintenir une certaine redondance dans le code afin de le rendre plus transparent et plus facile à appréhender pour nous et d'autres personnes qui pourraient travailler sur le projet. Cela a également contribué à minimiser la complexité globale de notre programme, ce qui était important compte tenu de la nature déjà complexe de la programmation concurrente. Il nous aurait fallu un peu plus de temps pour implémenter des fonctions génériques et de comprendre si cela aurait impacté ou non notre programme.
 
 ### Util
 C'est dans ce fichier que toute les différents seller de notre programmes sont crées et terminés. Lorsqu'on clique sur la croix de la fenêtre pour arrêter les différents threads, on doit ajouter dans la fonction `endService()` ce bout de code:
