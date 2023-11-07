@@ -48,7 +48,7 @@ bool Factory::verifyResources() {
 void Factory::buildItem() {
 
     int builderCost = getEmployeeSalary(getEmployeeThatProduces(itemBuilt));
-
+    if (builderCost > money) return;
     mutex.lock();
     money -= builderCost;
     for (auto& item : resourcesNeeded) {
@@ -74,13 +74,12 @@ void Factory::orderResources() {
         int price = getCostPerUnit(resource);
         if (stocks[resource] == 0) {
             for (auto wholesaler : wholesalers) {
-                mutex.lock();
                 if(wholesaler->getItemsForSale()[resource] > 0 && money >= price && wholesaler->trade(resource, 1) == price) {
+                    mutex.lock();
                     money -= price;
                     stocks[resource] += 1;
                     mutex.unlock();
                 }
-                mutex.unlock();
             }
         }
     }
