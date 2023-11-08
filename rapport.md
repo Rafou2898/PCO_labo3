@@ -120,17 +120,34 @@ Nous avons pris conscience que notre programme contient une quantité considéra
 Nous avons donc fait le choix délibéré de maintenir une certaine redondance dans le code afin de le rendre plus transparent et plus facile à appréhender pour nous et d'autres personnes qui pourraient travailler sur le projet. Cela a également contribué à minimiser la complexité globale de notre programme, ce qui était important compte tenu de la nature déjà complexe de la programmation concurrente. Il nous aurait fallu un peu plus de temps pour implémenter des fonctions génériques et de comprendre si cela aurait impacté ou non notre programme.
 
 ### Util
-C'est dans ce fichier que toute les différents seller de notre programmes sont crées et terminés. Lorsqu'on clique sur la croix de la fenêtre pour arrêter les différents threads, on doit ajouter dans la fonction `endService()` ce bout de code:
+C'est dans ce fichier que tout les différents seller de notre programmes sont crées et terminés. Afin d'arrêter les différents threads lorsque l'on clique sur la croix de la fenêtre, on doit ajouter dans la fonction `endService()` ce bout de code:
 ```c++
     for(auto& thread : threads){
         thread->requestStop();
     }
 ```
-Cette boucle for fait un requestStop aux thread et nous permet aussi d'utiliser un booléen dans le while des différentes fonction run() qui sont implémentées dans les `seller`. C'est donc cette condition `!PcoThread::thisThread()->stopRequested())` qui interrompt les boucles while et qui fait que nos threads s'arrêtent de travailler et que l'on peut quitter le programme sans erreur.
+Cette boucle for fait un requestStop aux thread et nous permet aussi d'utiliser un booléen dans le while des différentes fonction r`un()` qui sont implémentées dans les `seller`. C'est donc cette condition `!PcoThread::thisThread()->stopRequested())` qui interrompt les boucles while et qui fait que nos threads s'arrêtent de travailler et que l'on peut quitter le programme sans erreur.
 
 ## Tests
-Pour ce labo, il a été difficile de trouver de bons tests pour vérifier le fonctionnement de notre programme. Cependant, il est quand même possible de faire certains test "visuel". Nous avons par exemple enlever les mutex dans les fonctions et avons vu que < a tester et dire ce que ça fait, peut être ajouter des images>.
-Les `Pco usleep` permet aux threads de prendre leur temps pour faire les transactions et construire les différents objets
+Pour ce labo, il a été difficile de trouver de bons tests pour vérifier le fonctionnement de notre programme. Cependant, il est quand même possible de faire certains test "visuel". Voici les quelques "test" que nous avons fait pour voir comment se comportait le programme. 
+1) Nous avons enlever les `pcoThread::usleep` et avons remarquer que les threads agissent tous en même temps et que des les début ils font tous leur travaillent mais le programme crache car il ne se passe plus rien et tout "freeze" et on peut voir des valeurs étranges comme par exemple le fait que presque tout les sellers n'ont presque plus d'argent. Même quitter le programme devient impossible et nous devons le forcer à quitter.
 
-- Test avec 1 extracteur, 1 usine et 1 grossiste et noter quelques transactions
-- Test le temps d'attente à 100000 (Ils doivent rester sur sleep, pas de blocage mutuel)
+Programme qui freeze:
+![noSleep](noSleep.png)
+Blocage à la fin du programme
+![noSleep2](noSleep2.png)
+
+2) Pour voir que tout se passait bien, nous avons aussi tester en réduisant le nombres de seller à un de chaque. Tout se passe bien, même s'il faut préciser que dans le cas de l'image suivante la factory ne produit rien vu que la mine ne produit pas les élèment dont a besoin la factory pour créer.
+
+1 de chaque
+![1 de chaque](1DeChaque.png)
+
+En ayant mit les trois usines, un wholeseller et une factory alors tout se psee bien aussi et la la factory peut commencer à acheter les matière nécessaire à la fabrication de ses objets.
+![3To1](3To1.png)
+
+3) Nous avons aussi tester le fait que tout se finisse bien et que l'on puisse correctement le programme. On le voit sur l'image qui suit avec le message de fin de programme.
+
+Fin de programme
+![testCroix](testCroix.png)
+
+4) Pour finir, il y a une chose étrange qui se produit qui est que lorsque l'on enlève tout les mutex de notres programme, tout à l'air de bien se passé et que quand on quitte le programme les transactions ont l'air de s'être bien passé. Nous ne pouvons pas expliquer pourquoi cela se passe. 
